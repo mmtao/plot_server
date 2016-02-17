@@ -1,0 +1,32 @@
+<!----------------------------------------------------------------->
+<!-- AUTOMATICALLY GENERATED CODE - PLEASE EDIT TEMPLATE INSTEAD -->
+<!----------------------------------------------------------------->
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.8.js"></script>
+
+<!--
+  <link rel="stylesheet" type="text/css" href="global.css" media="screen" />
+-->
+  <style>
+    .axis path {
+      fill: none;
+      stroke: #777;
+      shape-rendering: crispEdges;
+    }
+    .axis text {
+      font-family: Lato;
+      font-size: 13px;
+    }
+    .legend {
+      font-size: 14px;
+      font-weight: bold;
+    }
+  </style>
+
+  <script src="propensity.js"></script>
+</div>
+</html>
