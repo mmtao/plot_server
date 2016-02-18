@@ -14,6 +14,7 @@ else {
         .append("svg")
 }
 
+// TODO: move this to an external file
 var data = [{
     "Client": "ABC",
     "sale": "110",
@@ -128,9 +129,14 @@ var lineGen = d3.svg.line()
 dataGroup.forEach(function(d, i) {
     svg.append('svg:path')
         .attr('d', lineGen(d.values))
-        .attr('stroke', function(d, j) {
+        .attr('stroke',
+        function(d, j) {
+         return d3.hsl(Math.random() * 360,"100%","50%");
+         })
+            // This doesn't work on node because there is no client side processing
+            /*function(d, j) {
             return "hsl(" + Math.random() * 360 + ",100%,50%)";
-        })
+        })*/
         .attr('stroke-width', 2)
         .attr('fill', 'none');
     lSpace = WIDTH / dataGroup.length;
@@ -212,7 +218,7 @@ svg.append("path")
     .attr("opacity", "0.2")
 ;
 
-// Export it
+// Export it if this is node
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = svg;
 }

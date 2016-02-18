@@ -1,86 +1,31 @@
 // pre-render d3 charts at server side
-var d3 = require('./node_modules/d3/d3.js')
-    , jsdom = require('jsdom')
-    , fs = require('fs')
+var fs = require('fs')
     , http = require('http')
     , url = require('url')
     , queryString = require('querystring')
-    , htmlStub = '<html><head></head><body><div id="dataviz-container"></div><script src="js/d3.v3.min.js"></script></body></html>'
-
-/*
-var XMLHttpReq = require("xmlhttprequest").XMLHttpRequest;
-var xhr = new XMLHttpReq();
-*/
-
-var port = 9595;
 
 jsdomsvg = function(chartId, type, payload) {
 
-    jsdom.env({
-        features: {QuerySelector: true}
-        , html: htmlStub
-        , done: function (errors, window) {
-            console.log(type);
-            console.log(payload);
+    if ('propensity' == type) {
+        var getSvgString = require('./index_propensity.js');
+    }
+    else if ('schoenfeld' == type) {
+        var getSvgString = require('./index_schoenfeld.js');
+    }
 
-            var el = window.document.querySelector('#dataviz-container')
-                , body = window.document.querySelector('body')
-
-/*
-            // generate the dataviz
-            var svgSelection = d3.select(el)
-                .append('svg:svg')
-                .attr('xmlns', 'http://www.w3.org/2000/svg')
-                .attr('width', payload.x)
-                .attr('height', payload.y)
-                .attr('id', chartId) // say, this value was dynamically retrieved from some database
-*/
-
-            if ('circle' == type) {
-/*
-                svgSelection
-                    .append('circle')
-                    .attr('cx', 300)
-                    .attr('cy', 150)
-                    .attr('r', 30)
-                    .attr('fill', '#26963c')
-                    console.log("drawing a circle!");
-*/
-            }
-            if ('bar' == type) {
-                svgSelection
-                    .append('rect')
-                    .attr('x', 0)
-                    .attr('y', 0)
-                    .attr('width', 300)
-                    .attr('height', 500)
-                    .attr('fill', '#26963c')
-                console.log("drawing a rect!");
-            }
-            // make the client-side script manipulate the circle at client side)
-            var clientScript = "d3.select('#" + chartId + "').transition().delay(1000).attr('fill', '#f9af26')"
-
-            d3.select(body)
-                .append('script')
-                .html(clientScript)
-
-            var document = window.document
-            // save result in an html file, we could also keep it in memory, or export the interesting fragment into a database for later use
-            var svgcontainer = window.document.querySelector("#dataviz-container")
-            var svginner = svgcontainer.innerHTML
-
-            fs.writeFile('id_' + chartId + '.svg', svginner, function (err) {
-                if (err) {
-                    console.log('error saving document', err)
-                } else {
-                    console.log('The file was saved!')
-                }
-            })
-
+    // write out the svg
+    var filename = type + '_' + chartId + '.svg';
+    fs.writeFile(filename, getSvgString(), function(err) {
+        if (err) {
+            console.log("error saving document ", err);
+        }
+        else {
+            console.log("File saved! " + filename);
         }
     })
 }
 
+var port = 9595;
 var count = 0;
 var server = http.createServer(function (request, response) {
 
