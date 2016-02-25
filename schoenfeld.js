@@ -15,7 +15,6 @@ function schoenfeld(inputdata) {
             .append("svg")
     }
 
-
     // Reorg schoenfeld data
     var timeValues = inputdata[0].timeValues;
     var residuals = inputdata[0].residuals;
@@ -46,85 +45,122 @@ function schoenfeld(inputdata) {
             })
         }
     }
-   console.log(fit_data);
+   //console.log(fit_data);
+    console.log(d3.min(fit_data, function(c) { return c.xfit; }));
+    console.log(d3.max(fit_data, function(c) { return c.xfit; }));
 
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
-        width = 960 - margin.left - margin.right,
+    var margin = {top: 20, right: 20, bottom: 30, left: 50},
+        width = 760 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
+    // Get scaling for the two axis (essentially how much canvas space)
     var x = d3.scale.log()
-        .range([0, width]);
+        .range([margin.left, width - margin.right]);
 
     var y = d3.scale.linear()
-        .range([height, 0]);
+        .range([height - margin.top, margin.bottom]);
 
-    var color = d3.scale.category10();
+    // Calculate the domain (the raw values that will be scaled to the canvas size)
+    x.domain(d3.extent(fit_data, function (d) {
+        return d.xfit;
+    }));
 
+    var miny = d3.min(data, function(c) { return c.residuals; });
+    var minylower = d3.min(fit_data, function(c) { return c.ylower; } );
+    var maxy = d3.max(data, function(c) { return c.residuals; });
+    var maxyupper = d3.max(fit_data, function(c) { return c.yupper; } );
+    y.domain([
+        Math.min(miny, minylower),
+        Math.max(maxy, maxyupper)
+    ]).nice();
+
+    // Draw the axes
     var xAxis = d3.svg.axis()
         .scale(x)
-        .orient("bottom");
+        .orient("bottom")
+        .ticks(5, ",.1s")
+        .tickSize(6, 0);
 
     var yAxis = d3.svg.axis()
         .scale(y)
-        .orient("left").ticks(10);
+        .orient("left");
 
     svg.attr('xmlns', 'http://www.w3.org/2000/svg')
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
-        .append("g");
-    /*
-     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-     */
-
-    x.domain(d3.extent(data, function (d) {
-        return d.timeValues;
-    })).nice();
-    y.domain(d3.extent(data, function (d) {
-        return d.residuals;
-    })).nice();
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     svg.append("g")
         .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
+        .attr("transform", "translate(0," + (height - margin.top) + ")")
         .call(xAxis)
         .append("text")
         .attr("class", "label")
-        .attr("x", width)
-        .attr("y", -6)
-        .style("text-anchor", "end")
+        .attr("x", width /2 )
+        .attr("y", margin.bottom)
+        .attr("dy", ".71em")
+        .style("text-anchor", "middle")
         .text("Log Time");
 
+    // Remember the text is rotated, so all of the text coordinates are off a different reference
     svg.append("g")
         .attr("class", "y axis")
+        .attr("transform", "translate(" + margin.left + ",0)")
         .call(yAxis)
         .append("text")
         .attr("class", "label")
         .attr("transform", "rotate(-90)")
-        .attr("y", 10)
-
-        /*
-         .attr("y", 6)
-         .attr("dy", ".71em")
-         */
-        .style("text-anchor", "end")
+        .attr("y", 0 - margin.left)
+        .attr("x", 0 - (height /2))
+        .attr("dy", ".71em")
+        .style("text-anchor", "middle")
         .text("Scaled Schoenfeld Residual for Exposure")
+    ;
+
+    // Draws the grid lines
+    svg.selectAll("line.horizonalGrid").data(y.ticks(4)).enter()
+        .append("line")
+        .attr(
+            {
+                "class":"horizontalGrid",
+                "x1" : margin.left,
+                "x2" : width-margin.right,
+                "y1" : function(d){ return y(d);},
+                "y2" : function(d){ return y(d);},
+                "fill" : "none",
+                "shape-rendering" : "crispEdges",
+                "stroke" : "black",
+                "stroke-width" : "1px",
+                "opacity" : 0.3
+            })
+        .style("stroke-dasharray", ("3, 3"))  // <== This line here!!
+    ;
+
+    svg.append("line")
+        .attr(
+            {
+                "x1" : margin.left,
+                "x2" : width-margin.right,
+                "y1" : y(0),
+                "y2" : y(0),
+                "fill" : "none",
+                "shape-rendering" : "crispEdges",
+                "stroke" : "black",
+                "stroke-width" : "1px",
+            })
 
     svg.selectAll(".dot")
         .data(data)
         .enter().append("circle")
         .attr("class", "dot")
-        .attr("r", 3.5)
         .attr("cx", function (d) {
             return x(d.timeValues);
         })
         .attr("cy", function (d) {
             return y(d.residuals);
         })
-        .attr("fill-opacity", 0);
-/*        .style("fill", function (d) {
-            return "black";
-        });*/
-
+        .attr("r", 3.5);
 
 
     // Fitted line
@@ -137,129 +173,22 @@ function schoenfeld(inputdata) {
         }).interpolate("basis");
 
     svg.append("path")
+        .attr('class', "fit line")
         .attr('d', lineGen(fit_data))
-        .attr('stroke', 'blue')
-        .attr('stroke-width', 2)
         .attr('fill', 'none');
 
-    var lineGenUpper = d3.svg.line()
-        .x(function (d) {
-            return x(d.xfit);
-        })
-        .y(function (d) {
-            return y(d.yupper);
-        }).interpolate("basis");
-
-    var lineGenLower = d3.svg.line()
-        .x(function (d) {
-            return x(d.xfit);
-        })
-        .y(function (d) {
-            return y(d.ylower);
-        }).interpolate("basis");
-
-/*
-     svg.append("path")
-         .attr('d', lineGenUpper(fit_data))
-         .attr('stroke', 'gray')
-        .attr('stroke-width', 2)
-        .attr('fill', 'none');
-*/
-
-/*
-    svg.append("path")
-        .attr('d', lineGenLower(fit_data))
-        .attr('stroke', 'gray')
-        .attr('stroke-width', 2)
-        .attr('fill', 'none');
-*/
-
-/*
-    var area = d3.svg.area()
+    // Defines an area bounded by the lower and upper lines
+    var areaabove = d3.svg.area()
         .interpolate("basis")
         .x(function(d) { return x(d.xfit); })
         .y1(function(d) { return y(d.yupper); })
-        .y0(function(d) { return height; })
-        ;
-*/
-
-    var areabelow = d3.svg.area()
-        .interpolate("basis")
-        .x(function(d) { return x(d.xfit); })
-        .y1(function(d) { return y(d.yupper); })
-        .y0(function(d) { return 0; })
+        .y0(function(d) { return y(d.ylower); })
         ;
 
-    //console.log(fit_data);
-    svg.append("clipPath")
-        .attr("id", "clip-below")
-        .append("path")
-        .datum(fit_data)
-        .attr("d", areabelow);
-
-/*
-    svg.append("clipPath")
-        .attr("id", "clip-above")
-        .append("path")
-        .datum(fit_data)
-        .attr("d", area);
-*/
-
-/*
+    // Fill in the area
     svg.append("path")
         .attr("class", "area above")
-        .attr("clip-path", "url(#clip-above)")
-        .attr("d", area.y0(function(d) { return y(d.yupper); }));
-*/
-
-    svg.append("path")
-        .attr("class", "area below")
-//        .data(fit_data)
-        .attr('d', lineGenUpper(fit_data))
-        .attr("d", areabelow)
-        .attr("clip-path", "url(#clip-below)")
-/*
-       .attr("fill", "lightgrey")
-        .attr("opacity", '0.9')
-*/
-    ;
-
-    /*
-        svg.append("path")
-            //.datum(fit_data)
-            .attr("class", "area below")
-            .attr('d', lineGenUpper(fit_data))
-
-            //        .attr("clip-path", "url(#clip-below)")
-            .attr("d", area)
-            .attr("fill", "yellow")
-            .attr("opacity", '0.2')
-        ;
-    */
-
-
-    var legend = svg.selectAll(".legend")
-        .data(color.domain())
-        .enter().append("g")
-        .attr("class", "legend")
-        .attr("transform", function (d, i) {
-            return "translate(0," + i * 20 + ")";
-        });
-
-    legend.append("rect")
-        .attr("x", width - 18)
-        .attr("width", 18)
-        .attr("height", 18)
-        .style("fill", color);
-
-    legend.append("text")
-        .attr("x", width - 24)
-        .attr("y", 9)
-        .attr("dy", ".35em")
-        .style("text-anchor", "end")
-        .text(function (d) {
-            return d;
-        });
+        .attr('d', areaabove(fit_data));
 
     return svg;
 }
