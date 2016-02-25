@@ -1,3 +1,7 @@
+@font-face {
+    font-family: 'OpenSans';
+    src: url('open-sans/OpenSans-Regular.ttf') format('truetype');
+}
 .axis path {
     fill: none;
     stroke: #000;
@@ -5,12 +9,25 @@
 }
 .dot {
     stroke: #000;
+    shape-rendering: crispEdges;
+    fill: none;
+    fill-opacity: 0.1;
 }
 .axis text {
-    font-family: Lato;
+    font-family: 'OpenSans';
     font-size: 13px;
 }
 .legend {
     font-size: 14px;
     font-weight: bold;
+}
+
+.area.above {
+    fill: grey;
+    opacity: 0.5;
+}
+
+.fit.line {
+    stroke: blue;
+    stroke-width: 2;
 }

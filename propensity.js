@@ -34,7 +34,6 @@ function propensity(inputdata) {
             top: 50,
             right: 20,
             bottom: 50,
-            left: 50
         }
 
     // The inner function is an accessor function to specify how to access the 'data' argument
@@ -131,6 +130,8 @@ function propensity(inputdata) {
      .attr("offset", function(d) { return d.offset; })
      .attr("stop-color", function(d) { return d.color; });
      */
+
+//    console.log(dataGroup[0]);
 
     svg.append("path")
         .datum(dataGroup[0].values)

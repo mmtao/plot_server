@@ -23,7 +23,10 @@ jsdomsvg = function(chartId, type, payload) {
             console.log("File saved! " + filename);
         }
     })
-    return filename;
+    return {
+        filename : filename,
+        svg      : svg_string
+    };
 }
 
 var port = 9595;
@@ -31,7 +34,7 @@ var count = 0;
 var server = http.createServer(function (request, response) {
 
     count = count + 1;
-    var outputfile = "";
+    var result = {};
 
     if (request.method == 'POST') {
         var body = '';
@@ -48,17 +51,16 @@ var server = http.createServer(function (request, response) {
         request.on('end', function () {
             var post = queryString.parse(body);
             var myJson = JSON.parse(body);
-            console.log(myJson);
-            outputfile = jsdomsvg(count, myJson.type, myJson.data);
+            //console.log(myJson);
+            result = jsdomsvg(count, myJson.type, myJson.data);
+            //console.log(result);
+            response.writeHead(200, {
+                'Content-Type': 'text/html'
+            });
+            response.write(result.svg);
+            response.end();
         });
     }
-    response.writeHead(200, {
-        'Content-Type': 'text/html'
-    })
-    response.write('generated file is:' + outputfile);
-    response.write('\n');
-    response.end();
-
 });
 
 server.listen(port);

@@ -1,4 +1,4 @@
-var schoenfeld = require('./schoenfeld.js');
+var schoenfeld = require('./schoenfeld2.js');
 
 module.exports = function(data) {
 
