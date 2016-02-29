@@ -1,0 +1,53 @@
+@font-face {
+    font-family: 'OpenSans';
+    src: url('open-sans/OpenSans-Regular.ttf') format('truetype');
+}
+.axis text {
+    font-family: 'OpenSans';
+    font-size: 13px;
+}
+.horizontalGrid {
+    stroke: black;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+    opacity: 0.1
+}
+.verticalGrid {
+    stroke: black;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+    opacity: 0.1
+}
+
+.axis path {
+    stroke: #000;
+    shape-rendering: crispEdges;
+    fill: none;
+}
+.dot {
+    stroke: #000;
+    shape-rendering: crispEdges;
+    fill: none;
+    fill-opacity: 0.1;
+}
+.area.above {
+    fill: grey;
+    opacity: 0.5;
+}
+
+.exp0 {
+    stroke: blue;
+    stroke-width: 1;
+}
+.exp1 {
+    stroke: red;
+    stroke-width: 1;
+}
+.confidence0 {
+    fill: grey;
+    opacity: 0.5;
+}
+.confidence1 {
+    fill: grey;
+    opacity: 0.5;
+}

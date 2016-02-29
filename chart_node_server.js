@@ -12,6 +12,9 @@ jsdomsvg = function(chartId, type, payload) {
     else if ('schoenfeld' == type) {
         var svg_string = require('./node_schoenfeld.js')(payload);
     }
+    else if ('km' == type) {
+        var svg_string = require('./node_km.js')(payload);
+    }
 
     // write out the svg
     var outputdir = 'output';
@@ -53,9 +56,12 @@ var server = http.createServer(function (request, response) {
             //var post = queryString.parse(body);
             eval(body);
             console.log(datacontainer.type);
+
+            //TODO: much faster if we read in as JSON instead of js
             //var myJson = JSON.parse(datacontainer);
             //console.log(myJson);
             //result = jsdomsvg(count, myJson.type, myJson.data);
+
             result = jsdomsvg(count, datacontainer.type, datacontainer.data);
             response.writeHead(200, {
                 'Content-Type': 'text/html'
