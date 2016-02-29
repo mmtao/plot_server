@@ -25,7 +25,6 @@ function schoenfeld(inputdata) {
             "timeValues": timeValues[i],
             "residuals": residuals[i]
         })
-        //data[timeValues[i]] = residuals[i];
     }
 
     // Reorg fitted line
@@ -45,12 +44,9 @@ function schoenfeld(inputdata) {
             })
         }
     }
-   //console.log(fit_data);
-    console.log(d3.min(fit_data, function(c) { return c.xfit; }));
-    console.log(d3.max(fit_data, function(c) { return c.xfit; }));
 
-    var margin = {top: 20, right: 20, bottom: 30, left: 50},
-        width = 760 - margin.left - margin.right,
+    var margin = {top: 20, right: 20, bottom: 30, left: 100},
+        width = 800 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
     // Get scaling for the two axis (essentially how much canvas space)
@@ -97,11 +93,11 @@ function schoenfeld(inputdata) {
         .call(xAxis)
         .append("text")
         .attr("class", "label")
-        .attr("x", width /2 )
-        .attr("y", margin.bottom)
-        .attr("dy", ".71em")
-        .style("text-anchor", "middle")
-        .text("Log Time");
+        .attr("x", ((width /2)))
+//        .attr("y", margin.bottom)
+        .attr("dy", "4em")
+        .style("text-anchor", "start")
+        .text("Log Time (days)");
 
     // Remember the text is rotated, so all of the text coordinates are off a different reference
     svg.append("g")
@@ -111,44 +107,30 @@ function schoenfeld(inputdata) {
         .append("text")
         .attr("class", "label")
         .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margin.left)
+        //.attr("y", 0 - margin.left)
         .attr("x", 0 - (height /2))
-        .attr("dy", ".71em")
+        .attr("dy", "-4em")
         .style("text-anchor", "middle")
         .text("Scaled Schoenfeld Residual for Exposure")
     ;
 
     // Draws the grid lines
-    svg.selectAll("line.horizonalGrid").data(y.ticks(4)).enter()
+    svg.selectAll(".horizonalGrid").data(y.ticks(4)).enter()
         .append("line")
-        .attr(
-            {
-                "class":"horizontalGrid",
-                "x1" : margin.left,
-                "x2" : width-margin.right,
-                "y1" : function(d){ return y(d);},
-                "y2" : function(d){ return y(d);},
-                "fill" : "none",
-                "shape-rendering" : "crispEdges",
-                "stroke" : "black",
-                "stroke-width" : "1px",
-                "opacity" : 0.3
-            })
-        .style("stroke-dasharray", ("3, 3"))  // <== This line here!!
+        .attr("class", "horizontalGrid")
+        .attr("x1", margin.left)
+        .attr("x2", width-margin.right)
+        .attr("y1", function(d){ return y(d);})
+        .attr("y2", function(d){ return y(d);})
     ;
 
-    svg.append("line")
-        .attr(
-            {
-                "x1" : margin.left,
-                "x2" : width-margin.right,
-                "y1" : y(0),
-                "y2" : y(0),
-                "fill" : "none",
-                "shape-rendering" : "crispEdges",
-                "stroke" : "black",
-                "stroke-width" : "1px",
-            })
+    svg.selectAll(".centerLine").data(y.ticks(1)).enter()
+        .append("line")
+        .attr("class", "centerLine")
+        .attr("x1", margin.left)
+        .attr("x2", width-margin.right)
+        .attr("y1", y(0))
+        .attr("y2", y(0));
 
     svg.selectAll(".dot")
         .data(data)

@@ -7,15 +7,16 @@ var fs = require('fs')
 jsdomsvg = function(chartId, type, payload) {
 
     if ('propensity' == type) {
-        var svg_string = require('./index_propensity.js')(payload);
+        var svg_string = require('./node_propensity.js')(payload);
     }
     else if ('schoenfeld' == type) {
-        var svg_string = require('./index_schoenfeld.js')(payload);
+        var svg_string = require('./node_schoenfeld.js')(payload);
     }
 
     // write out the svg
+    var outputdir = 'output';
     var filename = type + '_' + chartId + '.svg';
-    fs.writeFile(filename, svg_string, function(err) {
+    fs.writeFile(outputdir + '/' + filename, svg_string, function(err) {
         if (err) {
             console.log("error saving document ", err);
         }
@@ -49,11 +50,13 @@ var server = http.createServer(function (request, response) {
         });
 
         request.on('end', function () {
-            var post = queryString.parse(body);
-            var myJson = JSON.parse(body);
+            //var post = queryString.parse(body);
+            eval(body);
+            console.log(datacontainer.type);
+            //var myJson = JSON.parse(datacontainer);
             //console.log(myJson);
-            result = jsdomsvg(count, myJson.type, myJson.data);
-            //console.log(result);
+            //result = jsdomsvg(count, myJson.type, myJson.data);
+            result = jsdomsvg(count, datacontainer.type, datacontainer.data);
             response.writeHead(200, {
                 'Content-Type': 'text/html'
             });

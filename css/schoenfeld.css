@@ -2,10 +2,30 @@
     font-family: 'OpenSans';
     src: url('open-sans/OpenSans-Regular.ttf') format('truetype');
 }
-.axis path {
+.axis text {
+    font-family: 'OpenSans';
+    font-size: 13px;
+}
+.horizontalGrid {
+    stroke: black;
+    stroke-width: 1px;
+    stroke-dasharray: 3;
+    shape-rendering: crispEdges;
+    opacity: 0.3
+}
+
+.centerLine {
+    stroke: black;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
     fill: none;
+    opacity: 1
+}
+
+.axis path {
     stroke: #000;
     shape-rendering: crispEdges;
+    fill: none;
 }
 .dot {
     stroke: #000;
@@ -13,15 +33,6 @@
     fill: none;
     fill-opacity: 0.1;
 }
-.axis text {
-    font-family: 'OpenSans';
-    font-size: 13px;
-}
-.legend {
-    font-size: 14px;
-    font-weight: bold;
-}
-
 .area.above {
     fill: grey;
     opacity: 0.5;
