@@ -10,29 +10,27 @@
     stroke: black;
     stroke-width: 1px;
     shape-rendering: crispEdges;
-    opacity: 0.1
+    opacity: 0.15
 }
 .verticalGrid {
     stroke: black;
     stroke-width: 1px;
     shape-rendering: crispEdges;
-    opacity: 0.1
+    opacity: 0.15
+}
+.legend {
+    stroke: black;
+    shape-rendering: crispEdges;
+    fill: white;
+    font-family: 'OpenSans';
+    font-weight: normal;
+    font-size: 10px;
 }
 
 .axis path {
     stroke: #000;
     shape-rendering: crispEdges;
     fill: none;
-}
-.dot {
-    stroke: #000;
-    shape-rendering: crispEdges;
-    fill: none;
-    fill-opacity: 0.1;
-}
-.area.above {
-    fill: grey;
-    opacity: 0.5;
 }
 
 .exp0 {

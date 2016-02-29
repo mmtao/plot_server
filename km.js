@@ -8,6 +8,7 @@ function km(inputdata) {
         var jsdom = require('jsdom');
         var document = jsdom.jsdom(),
             svg = d3.select(document.body).append("svg")
+        var d3legend = require('d3-legend')(d3);
     }
     else {
         // In browser
@@ -22,12 +23,6 @@ function km(inputdata) {
     var strata = data.strata;
     var upperbound = data.confIntUpperBound;
     var lowerbound = data.confIntLowerBound;
-
-    console.log(timeValues.length);
-    console.log(survival.length);
-    console.log(strata.length);
-    console.log(upperbound.length);
-    console.log(lowerbound.length);
 
     var data0 = [];
     var data1 = [];
@@ -51,10 +46,7 @@ function km(inputdata) {
         }
     }
 
-    console.log("after reorg");
-    console.log(data0.length);
-    console.log(data1.length);
-
+    // TODO: add some error checking
 
     var margin = {top: 20, right: 20, bottom: 30, left: 100},
         width = 800 - margin.left - margin.right,
@@ -151,6 +143,7 @@ function km(inputdata) {
     svg.append("path")
         .attr('class', "exp0")
         .attr('d', lineGen(data0))
+        .attr('data-legend', "E1=0")
         .attr('fill', 'none');
     svg.append("path")
         .attr("class", "confidence0")
@@ -159,10 +152,16 @@ function km(inputdata) {
     svg.append("path")
         .attr('class', "exp1")
         .attr('d', lineGen(data1))
+        .attr('data-legend', "E1=1")
         .attr('fill', 'none');
     svg.append("path")
         .attr("class", "confidence1")
         .attr("d", confidenceArea(data1));
+
+    svg.append("g")
+        .attr("class", "legend")
+        .attr("transform","translate(160,350)")
+        .call(d3.legend);
 
     return svg;
 }
