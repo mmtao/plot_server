@@ -21,7 +21,7 @@
 .legend {
     stroke: black;
     shape-rendering: crispEdges;
-    fill: white;
+    fill: none;
     font-family: 'OpenSans';
     font-weight: normal;
     font-size: 10px;
@@ -34,11 +34,9 @@
 }
 
 .exp0 {
-    stroke: blue;
     stroke-width: 1;
 }
 .exp1 {
-    stroke: red;
     stroke-width: 1;
 }
 .confidence0 {

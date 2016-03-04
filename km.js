@@ -8,7 +8,6 @@ function km(inputdata) {
         var jsdom = require('jsdom');
         var document = jsdom.jsdom(),
             svg = d3.select(document.body).append("svg")
-        var d3legend = require('d3-legend')(d3);
     }
     else {
         // In browser
@@ -17,35 +16,37 @@ function km(inputdata) {
     }
 
     // Reorg km data
-    var data = inputdata[0];
-    var timeValues = data.timeValues;
-    var survival = data.survivalEstimate;
-    var strata = data.strata;
-    var upperbound = data.confIntUpperBound;
-    var lowerbound = data.confIntLowerBound;
+    var indata = inputdata[0];
+    var timeValues = indata.timeValues;
+    var survival = indata.survivalEstimate;
+    var strata = indata.strata;
+    var upperbound = indata.confIntUpperBound;
+    var lowerbound = indata.confIntLowerBound;
 
-    var data0 = [];
-    var data1 = [];
+    // Gets the unique values in the strata
+    var strataNames = strata.filter(function(item, i, ar){ return ar.indexOf(item) === i; });
+    console.log(strataNames);
+    var color = ["blue", "red", "yellow"];
 
-    for (var i = 0; i < timeValues.length; i++) {
-        if ("E1=0" == strata[i]) {
-            data0.push({
-                "timeValues": timeValues[i],
-                "survival": survival[i],
-                "upperbound": upperbound[i],
-                "lowerbound": lowerbound[i]
-            })
-        }
-        else if ("E1=1" == strata[i]) {
-            data1.push({
-                "timeValues": timeValues[i],
-                "survival": survival[i],
-                "upperbound": upperbound[i],
-                "lowerbound": lowerbound[i]
-            })
-        }
+    var data = new Array(strataNames.length);
+    for (var i=0; i<data.length; i++) {
+        data[i]= [];
     }
 
+    for (var i = 0; i < timeValues.length; i++) {
+        for (var j = 0; j < strataNames.length; j++) {
+            if (strataNames[j] == strata[i]) {
+                data[j].push({
+                    "timeValues": timeValues[i],
+                    "survival": survival[i],
+                    "upperbound": upperbound[i],
+                    "lowerbound": lowerbound[i]
+                })
+                break;
+            }
+        }
+
+    }
     // TODO: add some error checking
 
     var margin = {top: 20, right: 20, bottom: 30, left: 100},
@@ -63,7 +64,7 @@ function km(inputdata) {
     x.domain(d3.extent(timeValues));
     var miny = d3.min(lowerbound);
     var maxy = d3.max(upperbound);
-    y.domain([miny, maxy]);
+    y.domain([0, maxy]);
 
     // Draw the axes
     var xAxis = d3.svg.axis()
@@ -140,29 +141,45 @@ function km(inputdata) {
         .y0(function(d) { return y(d.lowerbound); })
         ;
 
-    svg.append("path")
-        .attr('class', "exp0")
-        .attr('d', lineGen(data0))
-        .attr('data-legend', "E1=0")
-        .attr('fill', 'none');
-    svg.append("path")
-        .attr("class", "confidence0")
-        .attr("d", confidenceArea(data0));
+    for (var i=0; i<data.length; i++) {
+       // console.log("drawing" + data[i]);
+        svg.append("path")
+            .attr('class', "exp"+i)
+            .attr('d', lineGen(data[i]))
+            .attr('fill', 'none')
+            .attr('stroke', color[i])
+        svg.append("path")
+            .attr("class", "confidence"+i)
+            .attr("d", confidenceArea(data[i]));
+    }
 
-    svg.append("path")
-        .attr('class', "exp1")
-        .attr('d', lineGen(data1))
-        .attr('data-legend', "E1=1")
-        .attr('fill', 'none');
-    svg.append("path")
-        .attr("class", "confidence1")
-        .attr("d", confidenceArea(data1));
+    // Legend stuff
 
-    svg.append("g")
+    var legend = svg.append("g")
         .attr("class", "legend")
-        .attr("transform","translate(160,350)")
-        .call(d3.legend);
+        .attr("transform", "translate(150," + (height - 100 )  + ")")
 
+    var maxStrataName = d3.max(strataNames, function(d) { return d.length;});
+    legend.append("rect")
+        .attr("width", maxStrataName + 3+"em")
+        .attr("height", strataNames.length * 2+ "em")
+        .style("stroke", "black")
+
+    for (i = 0; i < strataNames.length; i++) {
+        legend.append("circle")
+            .attr("class", "legendItem0")
+            .attr("cx", "2em")
+            .attr("cy", (((i + 1) * 1.5) - 0.3) + "em")
+            .attr("r", "0.4em")
+            .attr("fill",color[i])
+
+        legend.append("text")
+            .attr("class", "legendline")
+            .attr("x", "3em")
+            .attr("y", (i + 1) * 1.5 + "em")
+
+            .text(strataNames[i]);
+    }
     return svg;
 }
 // Export it
