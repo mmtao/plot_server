@@ -15,163 +15,165 @@ function propensity(inputdata) {
             .append("svg")
     }
 
-    // no conversion needed
-    var data = inputdata;
+    var indata = inputdata[0];
+    var expGroup = indata.exposureGroup;
+    var xValues = indata.x;
+    var yValues = indata.y;
+    var xIntercept = indata.xintercept;
 
-    var dataGroup = d3.nest()
-        .key(function (d) {
-            return d.Client;
-        })
-        .entries(data);
+    // Gets the unique values in the strata
+    var expGroupNames = indata.exposureGroup.filter(function(item, i, ar){ return ar.indexOf(item) === i; });
+    //console.log(expGroupNames);
+    var color = ["red", "blue"];
 
-    // Set some attributes
-    svg.attr('xmlns', 'http://www.w3.org/2000/svg')
-        .attr("width", 1000)
-        .attr("height", 500)
-        WIDTH = 1000,
-        HEIGHT = 500,
-        MARGINS = {
-            top: 50,
-            right: 20,
-            bottom: 50,
+    var data = new Array(expGroupNames.length);
+    for (var i=0; i<data.length; i++) {
+        data[i]= [];
+    }
+
+    for (var i = 0; i < xValues.length; i++) {
+        for (var j = 0; j < expGroupNames.length; j++) {
+            if (expGroupNames[j] == expGroup[i]) {
+                data[j].push({
+                    "xValue": xValues[i],
+                    "yValue": yValues[i]
+                })
+                break;
+            }
         }
 
-    // The inner function is an accessor function to specify how to access the 'data' argument
-    function accessYear(d) {
-        return d.year;
     }
 
-    function accessSale(d) {
-        return d.sale;
-    }
+    var margin = {top: 20, right: 50, bottom: 30, left: 75},
+        width = 800 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
 
-    minyear = d3.min(data, accessYear);
-    maxyear = d3.max(data, accessYear);
-    minsale = d3.min(data, accessSale);
-    maxsale = d3.max(data, accessSale);
+    // Get scaling for the two axis (essentially how much canvas space)
+    var x = d3.scale.linear()
+        .range([margin.left, width - margin.right]);
 
-    xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([minyear, maxyear]),
-    yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([minsale, maxsale]),
+    var y = d3.scale.linear()
+        .range([height - margin.top, margin.bottom]);
 
-    xAxis = d3.svg.axis().scale(xScale),
-    yAxis = d3.svg.axis().scale(yScale).orient("left");
+    // Calculate the domain (the raw values that will be scaled to the canvas size)
+    x.domain(d3.extent(xValues));
+    y.domain(d3.extent(yValues));
 
-    svg.append("svg:g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom) + ")")
-        .call(xAxis);
-    svg.append("svg:g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0" + (MARGINS.left) + ",0)")
-        .call(yAxis);
+    // Draw the axes
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom")
+        .ticks(5, ",.1s")
+        .tickSize(6, 0);
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left");
+
+    svg.attr('xmlns', 'http://www.w3.org/2000/svg')
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + (height - margin.top) + ")")
+        .call(xAxis)
+        .append("text")
+        .attr("class", "label")
+        .attr("x", ((width /2)))
+        .attr("dy", "4em")
+        .style("text-anchor", "start")
+        .text("Propensity Score");
+
+    // Remember the text is rotated, so all of the text coordinates are off a different reference
+    svg.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + margin.left + ",0)")
+        .call(yAxis)
+        .append("text")
+        .attr("class", "label")
+        .attr("transform", "rotate(-90)")
+        .attr("x", 0 - (height /2))
+        .attr("dy", "-4em")
+        .style("text-anchor", "middle")
+        .text("Density of Patients")
+    ;
+
+    // Draws the grid lines
+    svg.selectAll(".horizonalGrid").data(y.ticks(7)).enter()
+        .append("line")
+        .attr("class", "horizontalGrid")
+        .attr("x1", margin.left)
+        .attr("x2", width-margin.right)
+        .attr("y1", function(d){ return y(d);})
+        .attr("y2", function(d){ return y(d);})
+    ;
 
     var lineGen = d3.svg.line()
         .x(function (d) {
-            return xScale(d.year);
+            return x(d.xValue);
         })
         .y(function (d) {
-            return yScale(d.sale);
+            return y(d.yValue);
         })
         .interpolate("basis");
-
-
-    dataGroup.forEach(function (d, i) {
-        svg.append('svg:path')
-            .attr('d', lineGen(d.values))
-            .attr('stroke',
-                function (d, j) {
-                    return d3.hsl(Math.random() * 360, "100%", "50%");
-                })
-            // This doesn't work on node because there is no client side processing
-            /*function(d, j) {
-             return "hsl(" + Math.random() * 360 + ",100%,50%)";
-             })*/
-            .attr('stroke-width', 2)
-            .attr('fill', 'none');
-        lSpace = WIDTH / dataGroup.length;
-
-        svg.append("text")
-            .attr("x", (lSpace / 2) + i * lSpace)
-            .attr("y", HEIGHT)
-            .style("fill", "black")
-            .attr("class", "legend")
-            .text(d.key);
-
-    });
-
-    minyearofsecond = d3.min(dataGroup[1].values, accessYear);
-    maxyearoffirst = d3.max(dataGroup[0].values, accessYear);
-
     var area = d3.svg.area()
         .x(function (d) {
-            return xScale(d.year);
+            return x(d.xValue);
         })
-        .y0(HEIGHT - MARGINS.bottom)
+        .y0(height - margin.top)
         .y1(function (d) {
-            return yScale(d.sale);
+            return y(d.yValue);
         })
         .interpolate("basis");
 
+    for (var i=0; i<data.length; i++) {
+        svg.append("path")
+            .attr("class", "area")
+            .attr("d", area(data[i]))
+            .attr("fill", color[i])
+        ;
+    }
 
-    /*
-     svg.append("linearGradient")
-     .attr("id", "area-gradient")
-     .attr("gradientUnits", "userSpaceOnUse")
-     .attr("x1", "0%").attr("y1", "0%")
-     .attr("x2", "100%").attr("y2", "0%")
-     .selectAll("stop")
-     .data([
-     {offset: "0%", color: "white"},
-     {offset: "55%", color: "white"},
-     {offset: "55%", color: "green"},
-     {offset: "100%", color: "green"}
-     ])
-     .enter().append("stop")
-     .attr("offset", function(d) { return d.offset; })
-     .attr("stop-color", function(d) { return d.color; });
-     */
+    // Draw intercept lines
+    for (var i=0; i<xIntercept.length; i++) {
+        svg.append("line")
+            .attr("class", "intercept")
+            .attr("x1", x(xIntercept[i]))
+            .attr("x2", x(xIntercept[i]))
+            .attr("y1", height - margin.top)
+            .attr("y2", margin.bottom)
+        ;
+    }
 
-//    console.log(dataGroup[0]);
-
-    svg.append("path")
-        .datum(dataGroup[0].values)
-        .attr("class", "area")
-        .attr("d", area)
-        //            .attr("fill", "url(#area-gradient)")
-        .attr("fill", "yellow")
-        .attr("opacity", "0.2")
+    // Legend stuff
+    var legend = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", "translate(" + (width - 50)+ " ," + (height - 100 )  + ")")
+    
+    legend.append("text")
+        .attr("class", "label")
+        .attr("x", "1.5em")
+        .text("Exposure Group")
     ;
 
+    for (i = 0; i < expGroupNames.length; i++) {
+        legend.append("circle")
+            .attr("class", "legendItem")
+            .attr("cx", "2em")
+            .attr("cy", (((i + 1) * 1.5) - 0.3) + "em")
+            .attr("r", "0.4em")
+            .attr("fill",color[i])
 
-    /*
-     svg.append("linearGradient")
-     .attr("id", "area-gradient2")
-     .attr("gradientUnits", "userSpaceOnUse")
-     .attr("x1", "0%").attr("y1", "0%")
-     .attr("x2", "100%").attr("y2", "0%")
-     .selectAll("stop")
-     .data([
-     {offset: "0%", color: "green", opacity: "1"},
-     {offset: "55%", color: "green", opacity: "1"},
-     {offset: "55%", color: "green", opacity: "0"},
-     {offset: "100%", color: "green", opacity: "0"}
+        legend.append("text")
+            .attr("class", "legend")
+            .attr("x", "3em")
+            .attr("y", (i + 1) * 1.5 + "em")
+            .text(expGroupNames[i]);
+    }
 
-     ])
-     .enter().append("stop")
-     .attr("offset", function(d) { return d.offset; })
-     .attr("stop-color", function(d) { return d.color; })
-     .attr("stop-opacity", function(d) { return d.opacity; });
-     ;
-     */
-
-    svg.append("path")
-        .datum(dataGroup[1].values)
-        .attr("class", "area")
-        .attr("d", area)
-        //            .attr("fill", "url(#area-gradient2)");
-        .attr("fill", "red")
-        .attr("opacity", "0.2")
-    ;
     return svg;
 }
 // Export it if this is node

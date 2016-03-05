@@ -1,13 +1,49 @@
+@font-face {
+    font-family: 'OpenSans';
+    src: url('open-sans/OpenSans-Regular.ttf') format('truetype');
+}
+.axis text {
+    font-family: 'OpenSans';
+    font-size: 13px;
+}
+.horizontalGrid {
+    stroke: black;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+    opacity: 0.15
+}
+.legend {
+    font-family: 'OpenSans';
+    font-size: 13px;
+}
+.legendItem {
+    stroke: black;
+    stroke-opacity: 1;
+    fill-opacity: 0.2;
+}
+
 .axis path {
     fill: none;
     stroke: #777;
     shape-rendering: crispEdges;
 }
-.axis text {
-    font-family: Lato;
-    font-size: 13px;
+
+.line {
+    stroke: black;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+    fill: none;
 }
-.legend {
-    font-size: 14px;
-    font-weight: bold;
+.area {
+    stroke: black;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+    fill-opacity: 0.2;
 }
+.intercept {
+    stroke: black;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+    fill: none;
+}
+

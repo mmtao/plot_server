@@ -47,7 +47,7 @@ function km(inputdata) {
         }
 
     }
-    // TODO: add some error checking
+    // TODO: add some error checking for the above
 
     var margin = {top: 20, right: 20, bottom: 30, left: 100},
         width = 800 - margin.left - margin.right,
@@ -154,7 +154,6 @@ function km(inputdata) {
     }
 
     // Legend stuff
-
     var legend = svg.append("g")
         .attr("class", "legend")
         .attr("transform", "translate(150," + (height - 100 )  + ")")

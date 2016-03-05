@@ -13,7 +13,6 @@
     shape-rendering: crispEdges;
     opacity: 0.3
 }
-
 .centerLine {
     stroke: black;
     stroke-width: 1px;
@@ -27,12 +26,14 @@
     shape-rendering: crispEdges;
     fill: none;
 }
+
 .dot {
     stroke: #000;
     shape-rendering: crispEdges;
     fill: none;
     fill-opacity: 0.1;
 }
+
 .area.above {
     fill: grey;
     opacity: 0.5;
